@@ -28,6 +28,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// make_trail
+DataFrame make_trail(double x0, double y0, DataFrame field_df, DataFrame existing_points, double step_length, double dtest);
+RcppExport SEXP _flow_make_trail(SEXP x0SEXP, SEXP y0SEXP, SEXP field_dfSEXP, SEXP existing_pointsSEXP, SEXP step_lengthSEXP, SEXP dtestSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type x0(x0SEXP);
+    Rcpp::traits::input_parameter< double >::type y0(y0SEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type field_df(field_dfSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type existing_points(existing_pointsSEXP);
+    Rcpp::traits::input_parameter< double >::type step_length(step_lengthSEXP);
+    Rcpp::traits::input_parameter< double >::type dtest(dtestSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_trail(x0, y0, field_df, existing_points, step_length, dtest));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pack_circles_cpp
 DataFrame pack_circles_cpp(int width, int height, int max_circles, double r, int max_attempts, int seed);
 RcppExport SEXP _flow_pack_circles_cpp(SEXP widthSEXP, SEXP heightSEXP, SEXP max_circlesSEXP, SEXP rSEXP, SEXP max_attemptsSEXP, SEXP seedSEXP) {
@@ -47,6 +63,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_flow_make_trails_cpp", (DL_FUNC) &_flow_make_trails_cpp, 8},
+    {"_flow_make_trail", (DL_FUNC) &_flow_make_trail, 6},
     {"_flow_pack_circles_cpp", (DL_FUNC) &_flow_pack_circles_cpp, 6},
     {NULL, NULL, 0}
 };

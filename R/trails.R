@@ -69,12 +69,12 @@ make_trails <- function(flowfield_df,
 #   ggplot2::geom_path() +
 #   ggplot2::coord_fixed()
 
-ff <- make_flowfield(w = 200, h = 200, plot = TRUE)
-
-make_trail(ff)|>
-    ggplot2::ggplot(ggplot2::aes(x, y, group = group)) +
-    ggplot2::geom_path() +
-    ggplot2::coord_fixed()
+# ff <- make_flowfield(w = 200, h = 200, plot = TRUE)
+#
+# make_trail(ff)|>
+#     ggplot2::ggplot(ggplot2::aes(x, y, group = group)) +
+#     ggplot2::geom_path() +
+#     ggplot2::coord_fixed()
 #
 # ff |>
 #   make_trails(particles = 100) |>

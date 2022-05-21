@@ -1,21 +1,47 @@
 # https://web.cs.ucdavis.edu/~ma/SIGGRAPH02/course23/notes/papers/Jobard.pdf
 
-make_trail <- function(w = 50, h = 50, lines, steps = 10, step_length = .5, d = 1) {
+#' Title
+#'
+#' @param flowfield_df A data.frame containing rows with x and y coordinates and
+#'   a corresponding angle.
+#' @param dsep The separating distance of newly-generated lines, as a proportion
+#'   of the width of the flowfield.
+#' @param dtest The minimal distance that lines are allowed to converge. A
+#'   proportion of \code{dsep}.
+#' @param max_steps The maximum number of steps (i.e. increments of \code{dsep})
+#'   that a line is allowed to grow. (Of course, a line will end earlier if it
+#'   hits the boundary of the flowfield or gets too close to another line
+#'   first.)
+#'
+#' @return
+#' @export
+#'
+#' @examples
+make_trail_x <- function(flowfield_df, max_steps = 100, dsep = .05, dtest = .5) {
 
-  dsep <- w*.05
+  width <- max(flowfield_df$x)
+  height <- max(flowfield_df$y)
+  dtest <- dsep * dtest
+  step_length <- dtest
 
   out <- data.frame(x = 0, y = 0, a = 0, line = 0)
   qtree <- update_tree(out)
+
   # for the first line, just pic a random starting point
-  starting_x <- w/2 #runif(1, min = 1, max = w-1)
-  starting_y <- h/2 #runif(1, min = 1, max = h-1)
   line <- 1
-  new_line <- grow_line(starting_x, starting_y, out, qtree, ff, steps, step_length, d, line = line, w, h)
-  # grid <- add_to_grid(grid, new_line$x, new_line$y)
+  starting_x <- width/2 #runif(1, min = 1, max = w-1)
+  starting_y <- height/2 #runif(1, min = 1, max = h-1)
+
+  new_line <- grow_line(starting_x, starting_y,
+                        out, qtree, flowfield_df,
+                        max_steps, step_length, dtest,
+                        line, width, height)
+
   out <- new_line
   qtree <- update_tree(out)
+
   queue <- list(new_line)
-  seeds <- update_current_line(queue, dsep, w, h)
+  seeds <- update_current_line(queue, dsep, width, height)
   queue <- queue[-1]
   finished <- FALSE
 
@@ -28,24 +54,25 @@ make_trail <- function(w = 50, h = 50, lines, steps = 10, step_length = .5, d = 
       starting_y <- seeds$y[i]
 
       # check if the point is valid
-      valid <- !check_neighbor(out, qtree, starting_x, starting_y, test_distance = d)
+      valid <- !check_neighbor(out, qtree, starting_x, starting_y, test_distance = dtest)
 
       if(valid) {
         # message("valid")
         line <- line + 1
-        new_line <- grow_line(starting_x, starting_y, out, qtree, ff, steps, step_length, d, line = line, w, h)
-        # grid <- add_to_grid(grid, new_line$x, new_line$y)
+        new_line <- grow_line(starting_x, starting_y,
+                              out, qtree, flowfield_df,
+                              max_steps, step_length, dtest,
+                              line, width, height)
+
         out <- dplyr::bind_rows(out, new_line)
         qtree <- update_tree(out)
         queue[[length(queue)+1]] <- new_line
       }
     }
 
-    # finished = T
-    # message(length(queue))
     # once we tried all seeds, need to update the seeds
     if(length(queue)==0) break
-    seeds <- update_current_line(queue, dsep, w, h)
+    seeds <- update_current_line(queue, dsep, width, height)
     queue <- queue[-1]
 
   }
@@ -72,28 +99,28 @@ update_tree <- function(new_data) {
 }
 
 
-grow_line <- function(starting_x, starting_y, data, qtree, ff, steps, step_length, d, line, w, h) {
+grow_line <- function(starting_x, starting_y, data, qtree, ff, steps, step_length, dtest, line, width, height) {
 
   x <- starting_x
   x2 <- starting_x
   y <- starting_y
   y2 <- starting_y
-  a <- ff$angle[ceiling(x[1]) + (ceiling(y[1])-1) * w]
+  a <- ff$angle[ceiling(x[1]) + (ceiling(y[1])-1) * width]
   a2 <- a
 
   for(i in 2:steps) {
     prev_x <- x[i-1]
     prev_y <- y[i-1]
-    angle <- ff$angle[ceiling(x[i-1]) + (ceiling(y[i-1])-1) * w]
+    angle <- ff$angle[ceiling(x[i-1]) + (ceiling(y[i-1])-1) * width]
     new_x <- prev_x + step_length * cos(angle)
     new_y <- prev_y + step_length * sin(angle)
 
     # if it reaches the edges, we're done
-    if(!inbounds(new_x, new_y, w, h)) break
+    if(!inbounds(new_x, new_y, width, height)) break
 
     # if it's too close to an existing line, we're done
     if(line > 1){
-      if(check_neighbor(data, qtree, new_x, new_y, test_distance = d)) break
+      if(check_neighbor(data, qtree, new_x, new_y, test_distance = dtest)) break
     }
     x[i] <- new_x
     y[i] <- new_y
@@ -104,15 +131,15 @@ grow_line <- function(starting_x, starting_y, data, qtree, ff, steps, step_lengt
   for(h in 2:steps) {
     prev_x <- x2[h-1]
     prev_y <- y2[h-1]
-    angle <- ff$angle[ceiling(x2[h-1]) + (ceiling(y2[h-1])-1) * w]
+    angle <- ff$angle[ceiling(x2[h-1]) + (ceiling(y2[h-1])-1) * width]
     new_x <- prev_x + step_length * cos(angle+pi)
     new_y <- prev_y + step_length * sin(angle+pi)
     # if it reaches the edges, we're done
-    if(!inbounds(new_x, new_y, w, h)) break
+    if(!inbounds(new_x, new_y, width, height)) break
 
     # if it's too close to an existing line, we're done
     if(line > 1) {
-      if(check_neighbor(data, qtree, new_x, new_y, test_distance = d)) break
+      if(check_neighbor(data, qtree, new_x, new_y, test_distance = dtest)) break
     }
     x2[h] <- new_x
     y2[h] <- new_y
@@ -162,14 +189,14 @@ update_current_line <- function(queue, dsep, w, h) {
 # dtest <- dsep*.9
 #
 #
-ff <- make_flowfield(50, 50, angle = 1, octaves = 1, frequency = .01, plot = FALSE)
+# ffdf <- make_flowfield(50, 50, angle = 1, octaves = 1, frequency = .01, plot = FALSE)
+# #
+# t <- make_trail(ffdf) |>
+#   tibble::rownames_to_column("point")
 #
-t <- make_trail(lines = 1, steps = 20, step_length = 1, d = .5) |>
-  tibble::rownames_to_column("point")
-
-ggplot2::ggplot(t, ggplot2::aes(x, y, group = line)) +
-  ggplot2::geom_path() +
-  ggplot2::coord_fixed()
+# ggplot2::ggplot(t, ggplot2::aes(x, y, group = line)) +
+#   ggplot2::geom_path() +
+#   ggplot2::coord_fixed()
 
 # pic <- t |>
 #   ggplot2::ggplot() +

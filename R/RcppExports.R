@@ -2,10 +2,14 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 make_trails_cpp <- function(field_df, particles_df, width, height, steps, step_length, min_dist, seed) {
-    .Call('_flow_make_trails_cpp', PACKAGE = 'flow', field_df, particles_df, width, height, steps, step_length, min_dist, seed)
+    .Call(`_flow_make_trails_cpp`, field_df, particles_df, width, height, steps, step_length, min_dist, seed)
+}
+
+make_trail <- function(x0, y0, field_df, existing_points, step_length, dtest) {
+    .Call(`_flow_make_trail`, x0, y0, field_df, existing_points, step_length, dtest)
 }
 
 pack_circles_cpp <- function(width, height, max_circles, r, max_attempts = 2000L, seed = 1L) {
-    .Call('_flow_pack_circles_cpp', PACKAGE = 'flow', width, height, max_circles, r, max_attempts, seed)
+    .Call(`_flow_pack_circles_cpp`, width, height, max_circles, r, max_attempts, seed)
 }
 
