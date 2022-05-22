@@ -5,8 +5,12 @@ make_trails_cpp <- function(field_df, particles_df, width, height, steps, step_l
     .Call(`_flow_make_trails_cpp`, field_df, particles_df, width, height, steps, step_length, min_dist, seed)
 }
 
-make_trail <- function(x0, y0, field_df, existing_points, step_length, dtest) {
-    .Call(`_flow_make_trail`, x0, y0, field_df, existing_points, step_length, dtest)
+make_trail <- function(x0, y0, field_df, existing_points, step_length = 1, max_steps = 1000L, direction = "both", dtest = 1) {
+    .Call(`_flow_make_trail`, x0, y0, field_df, existing_points, step_length, max_steps, direction, dtest)
+}
+
+make_trails_rcpp <- function(particles, field_df, step_length = 1, max_steps = 1000L, direction = "both", dtest = 1) {
+    .Call(`_flow_make_trails_rcpp`, particles, field_df, step_length, max_steps, direction, dtest)
 }
 
 pack_circles_cpp <- function(width, height, max_circles, r, max_attempts = 2000L, seed = 1L) {
