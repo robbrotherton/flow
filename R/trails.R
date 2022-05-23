@@ -1,7 +1,12 @@
-#' Title
+#' Generate flowfield trails
 #'
 #' @param flowfield_df
 #' @param particles
+#' @param start_positions
+#' @param max_steps
+#' @param step_length
+#' @param direction
+#' @param dtest
 #'
 #' @return
 #' @export
@@ -10,19 +15,25 @@
 make_trails <- function(flowfield_df,
                         particles = 100,
                         start_positions = c("grid", "runif", "poisson"),
-                        steps = .1, step_length = .05, min_dist = 0) {
+                        max_steps = 1,
+                        step_length = .05,
+                        direction = c("both", "forward", "backwards"),
+                        dtest = 0) {
 
   start_positions <- match.arg(start_positions,
                                choices = c("grid",
                                            "runif",
                                            "poisson"))
 
+  direction <- match.arg(direction,
+                         choices = c("both",
+                                     "forward",
+                                     "backward"))
+
   ff_width <- max(flowfield_df$x) # - min(flowfield_df$x)
   ff_height <- max(flowfield_df$y) # - min(flowfield_df$y)
-  steps <- as.integer(ff_width) * steps
+  max_steps <- as.integer(ff_width * max_steps)
   step_length <- ff_width * step_length
-
-  print(c(steps, step_length))
 
   if(start_positions == "poisson") {
     particles <- pack_circles_cpp(ff_width, ff_height,
@@ -39,20 +50,32 @@ make_trails <- function(flowfield_df,
     particles <- data.frame(x = runif(particles, min = 1, max = ff_width),
                             y = runif(particles, min = 1, max = ff_height))
   }
-  # starts_poisson <- poisson_disc(width = width,
-  #                                height = height,
-  #                                min_dist = 2.5)
 
-  make_trails_cpp(field_df = flowfield_df,
-                  particles_df = particles,
-                  width = ff_width,
-                  height = ff_height,
-                  steps = steps,
-                  step_length = step_length,
-                  min_dist = min_dist,
-                  seed = 3)
+  make_trails_rcpp(field_df = flowfield_df,
+                   particles = particles,
+                   max_steps = max_steps,
+                   step_length = step_length,
+                   direction = direction,
+                   dtest = dtest)
 
 }
+
+# make_flowfield(w = 200, h = 100, f = .015) |>
+#   # dplyr::mutate(angle = round(angle, 0)) |>
+#   make_trails(particles = 100,
+#               start_positions = "p",
+#               max_steps = .1,
+#               direction = "forward",
+#               step_length = .01,
+#               dtest = 1) |>
+#   draw_trails()
+
+
+# ggplot2::ggplot() +
+#   ggplot2::geom_path(data = t, ggplot2::aes(x, y, group = group), alpha = .5) +
+#   ggplot2::coord_fixed() +
+#   ggplot2::theme_void()
+
 # some way of figuring max circles and radius
 # seq(1, 20, length.out = 10)
 # seq(1, 10, length.out = 10)
