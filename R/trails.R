@@ -60,17 +60,20 @@ make_trails <- function(flowfield_df,
 
 }
 
-# make_flowfield(w = 200, h = 100, f = .015) |>
+# make_flowfield(w = 100, h = 100, f = .01) |>
 #   # dplyr::mutate(angle = round(angle, 0)) |>
 #   make_trails(particles = 100,
 #               start_positions = "p",
-#               max_steps = .1,
+#               max_steps = 1,
 #               direction = "forward",
 #               step_length = .01,
 #               dtest = 1) |>
 #   draw_trails()
 
-
+# ff <- make_flowfield(w = 100, h = 100, f = .01)
+# p <- data.frame(x = runif(100, min = 1, max = 100),
+#                 y = runif(100, min = 1, max = 100))
+# make_trails_rcpp(p, make_flowfield())
 # ggplot2::ggplot() +
 #   ggplot2::geom_path(data = t, ggplot2::aes(x, y, group = group), alpha = .5) +
 #   ggplot2::coord_fixed() +

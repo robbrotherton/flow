@@ -3,6 +3,8 @@
 using namespace Rcpp;
 using namespace std;
 
+bool check_neighbors(double x, double y, DataFrame existing_points, double dtest);
+
 // [[Rcpp::export]]
 DataFrame make_trails_cpp(DataFrame field_df,
                           DataFrame particles_df,
@@ -119,9 +121,9 @@ DataFrame make_trail(double x0,
   NumericVector ff_y = field_df["y"];
   NumericVector ff_a = field_df["angle"];
 
-  NumericVector existing_x = existing_points["x"];
-  NumericVector existing_y = existing_points["y"];
-  int n_existing_points = existing_x.size();
+  // NumericVector existing_x = existing_points["x"];
+  // NumericVector existing_y = existing_points["y"];
+  // int n_existing_points = existing_x.size();
 
   int min_x = min(ff_x);
   int max_x = max(ff_x);
@@ -174,10 +176,10 @@ DataFrame make_trail(double x0,
       new_y = prev_y + y_step;
 
       // Check if it's outside the bounds of the flowfield
-      if(new_x < min_x |
-         new_x > max_x |
-         new_y < min_y |
-         new_y > max_y) {
+      if((new_x < min_x) |
+         (new_x > max_x) |
+         (new_y < min_y) |
+         (new_y > max_y)) {
 
         break;
         // If it's out of bounds, the point won't be recorded
@@ -185,23 +187,14 @@ DataFrame make_trail(double x0,
 
       // now check if it's too close to any existing points
       if(dtest > 0) {
-        for(int i = 0; i < n_existing_points; ++i) {
-
-          double dx = new_x - existing_x[i];
-          double dy = new_y - existing_y[i];
-
-          double dist = dx * dx + dy * dy;
-
-          if(dist < (dtest * dtest)) {
-            valid = FALSE;
-            break;
-          }
-        }
+        valid = check_neighbors(new_x, new_y, existing_points, dtest);
       }
 
       if(valid) {
         x_out[step] = new_x;
         y_out[step] = new_y;
+      } else {
+        break;
       }
     }
   }
@@ -224,32 +217,23 @@ DataFrame make_trail(double x0,
       new_y = prev_y + y_step;
 
       // check if it's outside the bounds of the flowfield
-      if(new_x < min_x |
-         new_x > max_x |
-         new_y < min_y |
-         new_y > max_y) {
+      if((new_x < min_x) |
+         (new_x > max_x) |
+         (new_y < min_y) |
+         (new_y > max_y)) {
         break;
       }
 
       // now check if it's too close to any existing points
       if(dtest > 0) {
-        for(int i = 0; i < n_existing_points; ++i) {
-
-          double dx = new_x - existing_x[i];
-          double dy = new_y - existing_y[i];
-
-          double dist = dx * dx + dy * dy;
-
-          if(dist < (dtest * dtest)) {
-            valid = FALSE;
-            break;
-          }
-        }
+        valid = check_neighbors(new_x, new_y, existing_points, dtest);
       }
 
       if(valid) {
         x_out[step] = new_x;
         y_out[step] = new_y;
+      } else {
+        break;
       }
     }
   }
@@ -330,5 +314,26 @@ DataFrame make_trails_rcpp(DataFrame particles,
 }
 
 
+bool check_neighbors(double x, double y, DataFrame existing_points, double dtest) {
+
+  NumericVector existing_x = existing_points["x"];
+  NumericVector existing_y = existing_points["y"];
+  int n_existing = existing_x.size();
+  // Rcout << n_existing;
+
+  for(int i = 0; i < n_existing; ++i) {
+
+    // Rcout << i;
+    double dx = x - existing_x[i];
+    double dy = y - existing_y[i];
+
+    double dist = dx * dx + dy * dy;
+    //
+    if(dist < (dtest * dtest)) {
+      return(FALSE);
+    }
+  }
+  return(TRUE);
+}
 
 

@@ -2,23 +2,24 @@
 % Please edit documentation in R/trails.R
 \name{make_trails}
 \alias{make_trails}
-\title{Title}
+\title{Generate flowfield trails}
 \usage{
 make_trails(
   flowfield_df,
   particles = 100,
   start_positions = c("grid", "runif", "poisson"),
-  steps = 0.1,
+  max_steps = 1,
   step_length = 0.05,
-  min_dist = 0
+  direction = c("both", "forward", "backwards"),
+  dtest = 0
 )
 }
 \arguments{
-\item{particles}{}
+\item{dtest}{}
 }
 \value{
 
 }
 \description{
-Title
+Generate flowfield trails
 }
