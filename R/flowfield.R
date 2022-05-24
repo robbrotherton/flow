@@ -47,9 +47,9 @@ draw_field <- function(df) {
     ggplot2::theme_void()
 }
 
-draw_trails <- function(df) {
+draw_trails <- function(df, alpha = 1) {
   ggplot2::ggplot(data = df, ggplot2::aes(x, y, group = group)) +
-    ggplot2::geom_path() +
+    ggplot2::geom_path(alpha = alpha) +
     ggplot2::coord_fixed() +
     ggplot2::theme_void()
 }
