@@ -83,7 +83,7 @@ DataFrame make_trail(double x0,
         // If it's out of bounds, the point won't be recorded
       }
 
-      // now check if it's too close to any existing points
+      // Now check if it's too close to any existing points
       if(dtest > 0) {
         valid = check_neighbors(new_x, new_y, existing_points, dtest);
       }
