@@ -10,24 +10,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// make_trails_cpp
-DataFrame make_trails_cpp(DataFrame field_df, DataFrame particles_df, int width, int height, int steps, double step_length, double min_dist, int seed);
-RcppExport SEXP _flow_make_trails_cpp(SEXP field_dfSEXP, SEXP particles_dfSEXP, SEXP widthSEXP, SEXP heightSEXP, SEXP stepsSEXP, SEXP step_lengthSEXP, SEXP min_distSEXP, SEXP seedSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame >::type field_df(field_dfSEXP);
-    Rcpp::traits::input_parameter< DataFrame >::type particles_df(particles_dfSEXP);
-    Rcpp::traits::input_parameter< int >::type width(widthSEXP);
-    Rcpp::traits::input_parameter< int >::type height(heightSEXP);
-    Rcpp::traits::input_parameter< int >::type steps(stepsSEXP);
-    Rcpp::traits::input_parameter< double >::type step_length(step_lengthSEXP);
-    Rcpp::traits::input_parameter< double >::type min_dist(min_distSEXP);
-    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(make_trails_cpp(field_df, particles_df, width, height, steps, step_length, min_dist, seed));
-    return rcpp_result_gen;
-END_RCPP
-}
 // make_trail
 DataFrame make_trail(double x0, double y0, DataFrame field_df, DataFrame existing_points, double step_length, int max_steps, std::string direction, double dtest);
 RcppExport SEXP _flow_make_trail(SEXP x0SEXP, SEXP y0SEXP, SEXP field_dfSEXP, SEXP existing_pointsSEXP, SEXP step_lengthSEXP, SEXP max_stepsSEXP, SEXP directionSEXP, SEXP dtestSEXP) {
@@ -80,7 +62,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_flow_make_trails_cpp", (DL_FUNC) &_flow_make_trails_cpp, 8},
     {"_flow_make_trail", (DL_FUNC) &_flow_make_trail, 8},
     {"_flow_make_trails_rcpp", (DL_FUNC) &_flow_make_trails_rcpp, 6},
     {"_flow_pack_circles_cpp", (DL_FUNC) &_flow_pack_circles_cpp, 6},
