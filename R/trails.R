@@ -13,42 +13,40 @@
 #'
 #' @examples
 make_trails <- function(flowfield_df,
+                        start_positions,
                         particles = 100,
-                        start_positions = c("grid", "runif", "poisson"),
                         max_steps = 1,
-                        step_length = .05,
-                        direction = c("both", "forward", "backwards"),
+                        step_length = .01,
+                        direction = c("both", "forward", "backward"),
                         dtest = 0) {
 
-  start_positions <- match.arg(start_positions,
-                               choices = c("grid",
-                                           "runif",
-                                           "poisson"))
+  # start_positions <- match.arg(start_positions,
+  #                              choices = c("grid",
+  #                                          "runif",
+  #                                          "poisson"))
 
-  direction <- match.arg(direction,
-                         choices = c("both",
-                                     "forward",
-                                     "backward"))
+  direction <- match.arg(direction)
 
   ff_width <- max(flowfield_df$x) # - min(flowfield_df$x)
   ff_height <- max(flowfield_df$y) # - min(flowfield_df$y)
   max_steps <- as.integer(ff_width * max_steps)
   step_length <- ff_width * step_length
 
-  if(start_positions == "poisson") {
+  if (is.data.frame(start_positions)) {
+    particles <- start_positions
+  } else if (start_positions == "poisson")  {
     particles <- pack_circles_cpp(ff_width, ff_height,
                                   max_circles = particles,
                                   r = ff_width / sqrt(particles) / 2)
-  }
 
-  if(start_positions == "grid") {
+  } else if (start_positions == "grid") {
     particles <- ambient::long_grid(x = seq(1, ff_width, length.out=sqrt(particles)),
                                     y = seq(1, ff_height, length.out=sqrt(particles)))
-  }
-
-  if(start_positions == "runif") {
+  } else if (start_positions == "runif") {
     particles <- data.frame(x = runif(particles, min = 1, max = ff_width),
                             y = runif(particles, min = 1, max = ff_height))
+  } else {
+    stop("start positions not specified correctly")
   }
 
   make_trails_rcpp(field_df = flowfield_df,
@@ -60,14 +58,14 @@ make_trails <- function(flowfield_df,
 
 }
 
-# make_flowfield(w = 100, h = 100, f = .01) |>
+# make_flowfield(w = 200, h = 200, f = .01) |>
 #   # dplyr::mutate(angle = round(angle, 0)) |>
-#   make_trails(particles = 100,
+#   make_trails(particles = 500,
 #               start_positions = "p",
-#               max_steps = 1,
+#               max_steps = 2,
 #               direction = "forward",
 #               step_length = .01,
-#               dtest = 1) |>
+#               dtest = 0) |>
 #   draw_trails()
 
 # ff <- make_flowfield(w = 100, h = 100, f = .01)

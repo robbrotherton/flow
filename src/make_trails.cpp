@@ -3,7 +3,136 @@
 using namespace Rcpp;
 using namespace std;
 
+bool check_valid(double x, double y, int w, int h, DataFrame existing_points, double dtest);
 bool check_neighbors(double x, double y, DataFrame existing_points, double dtest);
+double get_angle(double x, double y, DataFrame flowfield_df);
+double get_angle2(double x, double y, int w);
+
+// [[Rcpp::export]]
+DataFrame make_long_trail(double x0,
+                          double y0,
+                          DataFrame flowfield,
+                          DataFrame existing_points,
+                          double step_length,
+                          double dtest,
+                          int max_steps = 1000) {
+
+  NumericVector ff_x = flowfield["x"];
+  NumericVector ff_y = flowfield["y"];
+  NumericVector ff_a = flowfield["angle"];
+
+  // int min_x = min(ff_x);
+  // int max_x = max(ff_x);
+  // int min_y = min(ff_y);
+  // int max_y = max(ff_y);
+  int w = max(ff_x);
+  int h = max(ff_y);
+
+  // double x_step;
+  // double y_step;
+  int step;
+
+  double x;
+  double y;
+  double a;
+  double a0 = ff_a[get_angle2(x0, y0, w)];
+
+  // std::vector<double>  x_forward(1000);
+  // std::vector<double>  y_forward(1000);
+  // std::vector<double>  a_forward(1000);
+  // std::vector<double> x_backward(1000);
+  // std::vector<double> y_backward(1000);
+  // std::vector<double> a_backward(1000);
+
+  NumericVector x_back(1000);
+  NumericVector y_back(1000);
+  NumericVector a_back(1000);
+
+  NumericVector x_out(1000);
+  NumericVector y_out(1000);
+  NumericVector a_out(1000);
+
+  bool valid;
+
+
+  // ------------------------------------- GROW LINE BACKWARD
+  x = x0;
+  y = y0;
+  a = a0;
+  step = 0;
+  x_back[step] = x;
+  y_back[step] = y;
+  a_back[step] = a;
+
+  valid = TRUE;
+
+  while(valid) {
+
+    x = x - step_length * cos(a);
+    y = y - step_length * sin(a);
+
+    valid = check_valid(x, y, w, h, existing_points, dtest);
+
+    if(valid) {
+      step++;
+      a = ff_a[get_angle2(x, y, w)];
+
+      x_back[step] = x;
+      y_back[step] = y;
+      a_back[step] = a;
+
+    }
+  }
+
+  // Now reverse the points so far
+
+  x_back = rev(x_back[Range(0, step)]);
+  y_back = rev(y_back[Range(0, step)]);
+  a_back = rev(a_back[Range(0, step)]);
+
+  for(int i = 0; i < step + 1; i++) {
+    x_out[i] = x_back[i];
+    y_out[i] = y_back[i];
+    a_out[i] = a_back[i];
+  }
+
+  // for(int i = 0; i < step + 1; i++) {
+  //   x_out[i] = x_back[step - i];
+  //   y_out[i] = y_back[step - i];
+  //   a_out[i] = a_back[step - i];
+  // }
+
+
+  // GROW LINE FORWARD --------------------------------------
+
+  x = x0;
+  y = y0;
+  a = a0;
+  valid = TRUE;
+
+  while(valid) {
+
+    x = x + step_length * cos(a);
+    y = y + step_length * sin(a);
+
+    valid = check_valid(x, y, w, h, existing_points, dtest);
+
+    if(valid) {
+      step++;
+      a = ff_a[get_angle2(x, y, w)];
+
+      x_out[step] = x;
+      y_out[step] = y;
+      a_out[step] = a;
+    }
+  }
+
+  return(DataFrame::create(_["x"]= x_out[Range(0, step)],
+                           _["y"]= y_out[Range(0, step)],
+                           _["a"]= a_out[Range(0, step)]));
+
+}
+
 
 // [[Rcpp::export]]
 DataFrame make_trail(double x0,
@@ -30,9 +159,11 @@ DataFrame make_trail(double x0,
 
   NumericVector x_out(max_steps);
   NumericVector y_out(max_steps);
+  NumericVector a_out(max_steps);
   int initial_step;
 
   double grid_angle;
+  double prev_a;
   double x_step;
   double y_step;
   double prev_x;
@@ -40,20 +171,32 @@ DataFrame make_trail(double x0,
   double new_x;
   double new_y;
 
+  // need to keep track of what indices are actually used, so that only these
+  // can be returned
+  int start_index;
+  int end_index;
+
   // int step = 500;
   if(direction == "forward") {
     initial_step = 0;
+    start_index = initial_step;
   } else if(direction == "backward") {
     initial_step = max_steps - 1;
+    end_index = initial_step;
   } else if(direction == "both") {
     initial_step = floor(max_steps / 2);
     max_steps = initial_step;
+    start_index = initial_step;
+    end_index = initial_step;
   } else {
     stop("'direction' must be one of 'forward', 'backward', or 'both'.");
   }
 
+  grid_angle = get_angle(x0, y0, field_df);
+
   x_out[initial_step] = x0;
   y_out[initial_step] = y0;
+  a_out[initial_step] = grid_angle;
 
   bool valid = TRUE;
 
@@ -64,11 +207,12 @@ DataFrame make_trail(double x0,
       valid = TRUE;
       prev_x = x_out[step - 1];
       prev_y = y_out[step - 1];
+      prev_a = a_out[step - 1];
 
-      grid_angle = ff_a[floor(prev_x)+(floor(prev_y)-1)*max_x - 1];
+      // grid_angle = get_angle(prev_x, prev_y, field_df);
 
-      x_step = step_length * cos(grid_angle);
-      y_step = step_length * sin(grid_angle);
+      x_step = step_length * cos(prev_a);
+      y_step = step_length * sin(prev_a);
 
       new_x = prev_x + x_step;
       new_y = prev_y + y_step;
@@ -91,6 +235,9 @@ DataFrame make_trail(double x0,
       if(valid) {
         x_out[step] = new_x;
         y_out[step] = new_y;
+        a_out[step] = get_angle(new_x, new_y, field_df);
+
+        end_index = step;
       } else {
         break;
       }
@@ -105,11 +252,13 @@ DataFrame make_trail(double x0,
       valid = TRUE;
       prev_x = x_out[step + 1];
       prev_y = y_out[step + 1];
+      prev_a = a_out[step + 1];
 
-      grid_angle = ff_a[floor(prev_x)+(floor(prev_y)-1)*max_x - 1];
+      // grid_angle = get_angle(prev_x, prev_y, field_df);
+      // grid_angle = ff_a[floor(prev_x)+(floor(prev_y)-1)*max_x - 1];
 
-      x_step = step_length * cos(grid_angle + M_PI);
-      y_step = step_length * sin(grid_angle + M_PI);
+      x_step = step_length * cos(prev_a + M_PI);
+      y_step = step_length * sin(prev_a + M_PI);
 
       new_x = prev_x + x_step;
       new_y = prev_y + y_step;
@@ -130,17 +279,27 @@ DataFrame make_trail(double x0,
       if(valid) {
         x_out[step] = new_x;
         y_out[step] = new_y;
+        a_out[step] = get_angle(new_x, new_y, field_df);
+
+        start_index = step;
       } else {
         break;
       }
     }
   }
 
-  x_out.erase(std::remove(x_out.begin(), x_out.end(), 0), x_out.end());
-  y_out.erase(std::remove(y_out.begin(), y_out.end(), 0), y_out.end());
+  // x_out.erase(std::remove(x_out.begin(), x_out.end(), 0), x_out.end());
+  // y_out.erase(std::remove(y_out.begin(), y_out.end(), 0), y_out.end());
+  // a_out.erase(std::remove(a_out.begin(), a_out.end(), 0), a_out.end());
   // group.erase(std::remove(group.begin(), group.end(), 0), group.end());
 
-  return(DataFrame::create(_["x"]= x_out, _["y"]= y_out));
+  // return(DataFrame::create(_["x"]= x_out,
+  //                          _["y"]= y_out,
+  //                          _["a"]= a_out));
+
+  return(DataFrame::create(_["x"]= x_out[Rcpp::Range(start_index, end_index)],
+                           _["y"]= y_out[Rcpp::Range(start_index, end_index)],
+                           _["a"]= a_out[Rcpp::Range(start_index, end_index)]));
 
 }
 
@@ -211,7 +370,24 @@ DataFrame make_trails_rcpp(DataFrame particles,
 
 }
 
+double get_angle(double x, double y, DataFrame flowfield_df) {
 
+  NumericVector angles = flowfield_df["angle"];
+  NumericVector x_col = flowfield_df["x"];
+  int max_x = max(x_col);
+
+  return angles[floor(x)+(floor(y)-1) * max_x - 1];
+
+}
+
+// [[Rcpp::export]]
+double get_angle2(double x, double y, int w) {
+
+  return floor(x)+(floor(y)-1) * w - 1;
+
+}
+
+// [[Rcpp::export]]
 bool check_neighbors(double x, double y, DataFrame existing_points, double dtest) {
 
   NumericVector existing_x = existing_points["x"];
@@ -235,3 +411,124 @@ bool check_neighbors(double x, double y, DataFrame existing_points, double dtest
 }
 
 
+// [[Rcpp::export]]
+DataFrame update_current_seeds(DataFrame line, DataFrame flowfield_df, double dsep) {
+  // take the first line in the queue (the oldest line) as the new current line
+
+  NumericVector x = line["x"];
+  NumericVector y = line["y"];
+  NumericVector a = line["a"];
+
+  int n = x.length();
+  NumericVector x_out(n * 2 - 1);
+  NumericVector y_out(n * 2 - 1);
+
+  // now compute all possible seed points; for each row of the df
+  for(int i = 0; i < n; i++) {
+
+    x_out[i]   = x[i] + dsep * cos(a[i] + M_PI * 0.5);
+    x_out[i+n] = x[i] + dsep * cos(a[i] - M_PI * 0.5);
+    y_out[i]   = y[i] + dsep * sin(a[i] + M_PI * 0.5);
+    y_out[i+n] = y[i] + dsep * sin(a[i] - M_PI * 0.5);
+
+    // check if seed is inbounds?
+
+  }
+
+  // randomize order before returning?
+
+  // all_possible_seeds <- data.frame(x = x, y = y) |>
+  //   dplyr::filter(inbounds(x, y, w, h)) |>
+  //   dplyr::mutate(rand = sample(1:dplyr::n(), dplyr::n())) |>
+  //   dplyr::arrange(rand)
+
+  return(DataFrame::create(_["x"] = x_out,
+                           _["y"] = y_out));
+
+}
+
+
+// [[Rcpp::export]]
+NumericVector grow(int len) {
+
+  std::vector<double> out;
+
+  for (int i = 0; i < len; i++) {
+    out.resize(i+1);
+    out[i] = i;
+  }
+
+  return Rcpp::wrap(out);
+}
+
+// [[Rcpp::export]]
+NumericVector grow2(int len) {
+
+  std::vector<double> out(10000);
+
+  for (int i = 0; i < len; i++) {
+    out[i] = i;
+  }
+
+  out.resize(len);
+
+  return Rcpp::wrap(out);
+}
+
+// [[Rcpp::export]]
+NumericVector grow3(int len) {
+
+  std::vector<double> out;
+  out.reserve(10000);
+
+  for (int i = 0; i < len; i++) {
+    out.push_back(i);
+  }
+
+  std::reverse(out.begin(), out.end());
+
+  return Rcpp::wrap(out);
+}
+
+// [[Rcpp::export]]
+NumericVector grow_rev(int steps) {
+
+  NumericVector init(10);
+  NumericVector out(10);
+
+  for (int i = 0; i < steps; i++) {
+    init[i] = i + 1;
+  }
+
+  for (int i = 0; i < steps; i++) {
+    out[i] = init[steps - i - 1];
+  }
+
+  return out;
+}
+
+// [[Rcpp::export]]
+NumericVector rever(NumericVector seq) {
+  return rev(seq);
+}
+
+
+
+bool check_valid(double x, double y, int w, int h, DataFrame existing_points, double dtest) {
+
+  // Check if point is out of bounds
+  if((x < 1) |
+     (x > w) |
+     (y < 1) |
+     (y > h)) {
+    return false;
+  }
+
+  // Now check if it's too close to any existing points
+  if(dtest > 0) {
+    return check_neighbors(x, y, existing_points, dtest);
+  } else {
+    return true;
+  }
+
+}

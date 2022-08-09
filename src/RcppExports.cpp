@@ -10,6 +10,23 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// make_long_trail
+DataFrame make_long_trail(double x0, double y0, DataFrame flowfield, DataFrame existing_points, double step_length, double dtest, int max_steps);
+RcppExport SEXP _flow_make_long_trail(SEXP x0SEXP, SEXP y0SEXP, SEXP flowfieldSEXP, SEXP existing_pointsSEXP, SEXP step_lengthSEXP, SEXP dtestSEXP, SEXP max_stepsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type x0(x0SEXP);
+    Rcpp::traits::input_parameter< double >::type y0(y0SEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type flowfield(flowfieldSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type existing_points(existing_pointsSEXP);
+    Rcpp::traits::input_parameter< double >::type step_length(step_lengthSEXP);
+    Rcpp::traits::input_parameter< double >::type dtest(dtestSEXP);
+    Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_long_trail(x0, y0, flowfield, existing_points, step_length, dtest, max_steps));
+    return rcpp_result_gen;
+END_RCPP
+}
 // make_trail
 DataFrame make_trail(double x0, double y0, DataFrame field_df, DataFrame existing_points, double step_length, int max_steps, std::string direction, double dtest);
 RcppExport SEXP _flow_make_trail(SEXP x0SEXP, SEXP y0SEXP, SEXP field_dfSEXP, SEXP existing_pointsSEXP, SEXP step_lengthSEXP, SEXP max_stepsSEXP, SEXP directionSEXP, SEXP dtestSEXP) {
@@ -44,6 +61,101 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_angle2
+double get_angle2(double x, double y, int w);
+RcppExport SEXP _flow_get_angle2(SEXP xSEXP, SEXP ySEXP, SEXP wSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type y(ySEXP);
+    Rcpp::traits::input_parameter< int >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_angle2(x, y, w));
+    return rcpp_result_gen;
+END_RCPP
+}
+// check_neighbors
+bool check_neighbors(double x, double y, DataFrame existing_points, double dtest);
+RcppExport SEXP _flow_check_neighbors(SEXP xSEXP, SEXP ySEXP, SEXP existing_pointsSEXP, SEXP dtestSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type y(ySEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type existing_points(existing_pointsSEXP);
+    Rcpp::traits::input_parameter< double >::type dtest(dtestSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_neighbors(x, y, existing_points, dtest));
+    return rcpp_result_gen;
+END_RCPP
+}
+// update_current_seeds
+DataFrame update_current_seeds(DataFrame line, DataFrame flowfield_df, double dsep);
+RcppExport SEXP _flow_update_current_seeds(SEXP lineSEXP, SEXP flowfield_dfSEXP, SEXP dsepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame >::type line(lineSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type flowfield_df(flowfield_dfSEXP);
+    Rcpp::traits::input_parameter< double >::type dsep(dsepSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_current_seeds(line, flowfield_df, dsep));
+    return rcpp_result_gen;
+END_RCPP
+}
+// grow
+NumericVector grow(int len);
+RcppExport SEXP _flow_grow(SEXP lenSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
+    rcpp_result_gen = Rcpp::wrap(grow(len));
+    return rcpp_result_gen;
+END_RCPP
+}
+// grow2
+NumericVector grow2(int len);
+RcppExport SEXP _flow_grow2(SEXP lenSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
+    rcpp_result_gen = Rcpp::wrap(grow2(len));
+    return rcpp_result_gen;
+END_RCPP
+}
+// grow3
+NumericVector grow3(int len);
+RcppExport SEXP _flow_grow3(SEXP lenSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
+    rcpp_result_gen = Rcpp::wrap(grow3(len));
+    return rcpp_result_gen;
+END_RCPP
+}
+// grow_rev
+NumericVector grow_rev(int steps);
+RcppExport SEXP _flow_grow_rev(SEXP stepsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type steps(stepsSEXP);
+    rcpp_result_gen = Rcpp::wrap(grow_rev(steps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rever
+NumericVector rever(NumericVector seq);
+RcppExport SEXP _flow_rever(SEXP seqSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type seq(seqSEXP);
+    rcpp_result_gen = Rcpp::wrap(rever(seq));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pack_circles_cpp
 DataFrame pack_circles_cpp(int width, int height, int max_circles, double r, int max_attempts, int seed);
 RcppExport SEXP _flow_pack_circles_cpp(SEXP widthSEXP, SEXP heightSEXP, SEXP max_circlesSEXP, SEXP rSEXP, SEXP max_attemptsSEXP, SEXP seedSEXP) {
@@ -62,8 +174,17 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_flow_make_long_trail", (DL_FUNC) &_flow_make_long_trail, 7},
     {"_flow_make_trail", (DL_FUNC) &_flow_make_trail, 8},
     {"_flow_make_trails_rcpp", (DL_FUNC) &_flow_make_trails_rcpp, 6},
+    {"_flow_get_angle2", (DL_FUNC) &_flow_get_angle2, 3},
+    {"_flow_check_neighbors", (DL_FUNC) &_flow_check_neighbors, 4},
+    {"_flow_update_current_seeds", (DL_FUNC) &_flow_update_current_seeds, 3},
+    {"_flow_grow", (DL_FUNC) &_flow_grow, 1},
+    {"_flow_grow2", (DL_FUNC) &_flow_grow2, 1},
+    {"_flow_grow3", (DL_FUNC) &_flow_grow3, 1},
+    {"_flow_grow_rev", (DL_FUNC) &_flow_grow_rev, 1},
+    {"_flow_rever", (DL_FUNC) &_flow_rever, 1},
     {"_flow_pack_circles_cpp", (DL_FUNC) &_flow_pack_circles_cpp, 6},
     {NULL, NULL, 0}
 };

@@ -17,86 +17,74 @@
 #' @export
 #'
 #' @examples
-make_trails_even <- function(flowfield_df, max_steps = 100, dsep = .05, dtest = .5) {
+make_trail_x <- function(flowfield_df, max_steps = 100, dsep = .05, dtest = .5) {
 
-  # need some properties of the flowfield and parameters as variables
   width <- max(flowfield_df$x)
   height <- max(flowfield_df$y)
-  dsep <- width * dsep
   dtest <- dsep * dtest
-  step_length <- 1
+  step_length <- dtest
 
-  # for the first line, just pick a random starting point
-  line_number <- 1
-  starting_x <- runif(1, min = 1, max = width-1)
-  starting_y <- runif(1, min = 1, max = height-1)
+  out <- data.frame(x = 0, y = 0, a = 0, line = 0)
+  qtree <- update_tree(out)
 
-  # Now generate a trail from that starting point, working backwards and forwards
-  new_line <- make_long_trail(starting_x,
-                              starting_y,
-                              flowfield_df,
-                              existing_points = data.frame(x = -100, y = -100),
-                              step_length = step_length,
-                              dtest = dtest)
+  # for the first line, just pic a random starting point
+  line <- 1
+  starting_x <- width/2 #runif(1, min = 1, max = w-1)
+  starting_y <- height/2 #runif(1, min = 1, max = h-1)
 
-  # return(new_line)
+  new_line <- grow_line(starting_x, starting_y,
+                        out, qtree, flowfield_df,
+                        max_steps, step_length, dtest,
+                        line, width, height)
 
-  # Initialize a list to collect each line as it it made. This will become the
-  # output
-  lines <- list(new_line)
+  out <- new_line
+  qtree <- update_tree(out)
 
-  queue_position <- 1
+  queue <- list(new_line)
+  seeds <- update_current_line(queue, dsep, width, height)
+  queue <- queue[-1]
+  finished <- FALSE
 
+  while(!finished) {
 
-  while(queue_position <= line_number) {
-
-    # print(paste("queue position: ", queue_position))
-    seeds <- get_seeds(lines[[queue_position]], dsep)
-
+    # use seedpoints from line from queue
     for(i in 1:length(seeds$x)) {
 
       starting_x <- seeds$x[i]
       starting_y <- seeds$y[i]
 
       # check if the point is valid
-
-      valid <- check_neighbors(starting_x, starting_y,
-                               existing_points = dplyr::bind_rows(lines),
-                               dtest = dtest) &
-               inbounds(starting_x, starting_y, width, height)
+      valid <- !check_neighbor(out, qtree, starting_x, starting_y, test_distance = dtest)
 
       if(valid) {
+        # message("valid")
+        line <- line + 1
+        new_line <- grow_line(starting_x, starting_y,
+                              out, qtree, flowfield_df,
+                              max_steps, step_length, dtest,
+                              line, width, height)
 
-        line_number <- line_number + 1
-        # print(line_number)
-
-        new_line <- make_trail(starting_x,
-                               starting_y,
-                               flowfield_df,
-                               existing_points = dplyr::bind_rows(lines),
-                               step_length = step_length,
-                               dtest = dtest)
-
-        lines[[line_number]] <- new_line
-
+        out <- dplyr::bind_rows(out, new_line)
+        qtree <- update_tree(out)
+        queue[[length(queue)+1]] <- new_line
       }
     }
 
-    # once we tried all seed points for the current queue line, increment the
-    # queue position
-    queue_position <- queue_position + 1
+    # once we tried all seeds, need to update the seeds
+    if(length(queue)==0) break
+    seeds <- update_current_line(queue, dsep, width, height)
+    queue <- queue[-1]
 
   }
 
-  dplyr::bind_rows(lines, .id = "group") |>
-    dplyr::mutate(group = as.numeric(group))
+  return(out)
 
 }
 
 
 
 inbounds <- function(x, y, w, h) {
-  x > 1 & x < w & y > 1 & y < h
+  x > 0 & x < w & y > 0 & y < h
 }
 
 # returns TRUE if the nearest neighbor is too close
@@ -106,32 +94,69 @@ check_neighbor <- function(data, qtree, x, y, test_distance) {
   dist < test_distance
 }
 
-get_seeds <- function(line, dsep) {
-  # take the first line in the queue (the oldest line) as the new current line
+update_tree <- function(new_data) {
+  SearchTrees::createTree(new_data)
+}
 
-  n <- nrow(line)
-  x <- numeric(n*2)
-  y <- numeric(n*2)
-  # now compute all possible seed points; for each row of the df
-  for(i in 1:n) {
 
-    x[i]   <- line$x[i] + dsep * cos(line$a[i] + pi/2)
-    x[i+n] <- line$x[i] + dsep * cos(line$a[i] - pi/2)
-    y[i]   <- line$y[i] + dsep * sin(line$a[i] + pi/2)
-    y[i+n] <- line$y[i] + dsep * sin(line$a[i] - pi/2)
+grow_line <- function(starting_x, starting_y, data, qtree, ff, steps, step_length, dtest, line, width, height) {
+
+  x <- starting_x
+  x2 <- starting_x
+  y <- starting_y
+  y2 <- starting_y
+  a <- ff$angle[ceiling(x[1]) + (ceiling(y[1])-1) * width]
+  a2 <- a
+
+  for(i in 2:steps) {
+    prev_x <- x[i-1]
+    prev_y <- y[i-1]
+    angle <- ff$angle[ceiling(x[i-1]) + (ceiling(y[i-1])-1) * width]
+    new_x <- prev_x + step_length * cos(angle)
+    new_y <- prev_y + step_length * sin(angle)
+
+    # if it reaches the edges, we're done
+    if(!inbounds(new_x, new_y, width, height)) break
+
+    # if it's too close to an existing line, we're done
+    if(line > 1){
+      if(check_neighbor(data, qtree, new_x, new_y, test_distance = dtest)) break
+    }
+    x[i] <- new_x
+    y[i] <- new_y
+    a[i] <- angle
   }
 
-  # all_possible_seeds <- data.frame(x = x, y = y) |>
-  #   dplyr::filter(inbounds(x, y, w, h)) |>
-  #   dplyr::mutate(rand = sample(1:dplyr::n(), dplyr::n())) |>
-  #   dplyr::arrange(rand)
-  #
-  # return(all_possible_seeds)
+  # moving the other way
+  for(h in 2:steps) {
+    prev_x <- x2[h-1]
+    prev_y <- y2[h-1]
+    angle <- ff$angle[ceiling(x2[h-1]) + (ceiling(y2[h-1])-1) * width]
+    new_x <- prev_x + step_length * cos(angle+pi)
+    new_y <- prev_y + step_length * sin(angle+pi)
+    # if it reaches the edges, we're done
+    if(!inbounds(new_x, new_y, width, height)) break
 
-  data.frame(x = x, y = y) |>
-    dplyr::mutate(rand = sample(1:dplyr::n(), dplyr::n())) |>
-    dplyr::arrange(rand)
+    # if it's too close to an existing line, we're done
+    if(line > 1) {
+      if(check_neighbor(data, qtree, new_x, new_y, test_distance = dtest)) break
+    }
+    x2[h] <- new_x
+    y2[h] <- new_y
+    a2[h] <- angle
+
+  }
+
+  x <- c(rev(x2), x)
+  y <- c(rev(y2), y)
+  a <- c(rev(a2), a)
+
+  data.frame(x, y, a, line)
+
 }
+
+
+
 
 # create new seedpoints
 update_current_line <- function(queue, dsep, w, h) {
