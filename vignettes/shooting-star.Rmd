@@ -1,0 +1,123 @@
+---
+title: "shooting-star"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{shooting-star}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(dplyr)
+library(flow)
+library(ggplot2)
+
+
+star <- draw::star(radius = 5) |> 
+  mutate(x = x - min(x) + 1,
+         y = y - min(y) + 1)
+
+start_points1 <- star
+
+for(i in 1:(nrow(star) - 1)) {
+  start_points1$lerp_x[i] <- list(seq(star$x[i], star$x[i+1], length.out = 5))
+  start_points1$lerp_y[i] <- list(seq(star$y[i], star$y[i+1], length.out = 5))
+}
+
+start_points1 <- start_points1 |> 
+  select(x = lerp_x, y = lerp_y) |> 
+  tidyr::unnest(c(x, y))
+
+
+start_points2 <- flow::pack_circles_cpp(max(star$x), max(star$y), 100, .1, seed = runif(1, 1, 10000))
+start_points2$inside <- draw::points_in_polygon(start_points2, polygon = star)
+start_points2 <- filter(start_points2, inside)
+start_points0 <- bind_rows(start_points1, start_points2) |> 
+  mutate(x = x,
+         y = y)
+
+start_points <- bind_rows(mutate(start_points0, x = x + runif(1, 20, 80), y = y + runif(1, 20, 80)),
+                          mutate(start_points0, x = x + runif(1, 20, 80), y = y + runif(1, 20, 80)),
+                          mutate(start_points0, x = x + runif(1, 20, 80), y = y + runif(1, 20, 80)),
+                          .id = "star")
+  
+
+# ggplot() +
+#   # geom_point(data = start_points, aes(x, y)) +
+#   geom_point(data = start_points, aes(x, y))
+
+
+ff <- make_flowfield(angle = 2, frequency = .005, octaves = 2, fractal = "billow")
+
+t <- make_trails(ff, 
+                 start_positions = start_points,
+                 direction = "forward",
+                 max_steps = .5, 
+                 step_length = .005,
+                 dtest = .1)
+
+t2 <- t |> 
+  group_by(group) |> 
+  slice(1:runif(1, min = 1, max = n()))
+
+ggplot() +
+  # geom_polygon(data = star + 50, aes(x, y), fill = "gold") +
+  # geom_point(data = start_points, aes(x, y)) +
+  # geom_path(data = star + 50, aes(x, y)) +
+  geom_path(data = t2, aes(x, y, group = group)) +
+  coord_fixed()
+
+
+# t <- make_trails(ff, start_positions = "poisson", direction = "backward", max_steps = 20)
+# draw_trails(t)
+```
+
+
+```{r hatch}
+### end points of hatch ----
+
+star <- draw::star(radius = 5) |>  
+  draw::fill_hatch(spacing = .5, keep_outline = FALSE) |> 
+  mutate(x = -x + 50,
+         y = y + 50)
+  # draw::fill_wave(spacing = .5, amplitude = .5, frequency = .5, keep_outline = FALSE)
+
+start_points <- star |> 
+  group_by(group) |> 
+  slice(1)
+
+ggplot() + 
+  geom_path(data = star, aes(x, y, group = group)) +
+  geom_point(data = start_points, aes(x, y))
+
+
+
+ff <- make_flowfield(angle = 2)
+
+t <- make_trails(ff, 
+                 particles = 500,
+                 start_positions = start_points,
+                 direction = "forward",
+                 max_steps = 1, 
+                 step_length = .005)
+t2 <- t |> 
+  mutate(group = as.integer(group + 1)) |> 
+  group_by(group) |> 
+  slice(1:runif(1, min = 1, max = n()))
+
+ggplot() +
+  # geom_polygon(data = star + 50, aes(x, y), fill = "gold") +
+  # geom_point(data = start_points, aes(x, y)) +
+  # geom_path(data = star + 50, aes(x, y)) +
+  geom_path(data = star, aes(x, y, group = group)) +
+  geom_path(data = t2, aes(x, y, group = group)) +
+  coord_fixed()
+
+```
