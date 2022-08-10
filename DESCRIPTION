@@ -16,7 +16,9 @@ Imports:
     Rcpp
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 URL: https://github.com/robbrotherton/flow
 BugReports: https://github.com/robbrotherton/flow/issues
+Config/testthat/edition: 3
