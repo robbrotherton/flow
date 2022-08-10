@@ -61,6 +61,3 @@ make_flowfield <- function(width = 100, height = 100,
   return(ff)
 
 }
-
-
-
