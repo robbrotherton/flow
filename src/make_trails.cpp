@@ -449,6 +449,34 @@ DataFrame update_current_seeds(DataFrame line, DataFrame flowfield_df, double ds
 
 
 // [[Rcpp::export]]
+DataFrame path_to_polygon(DataFrame path, double thickness = 1) {
+  // take the first line in the queue (the oldest line) as the new current line
+
+  NumericVector x = path["x"];
+  NumericVector y = path["y"];
+  NumericVector a = path["a"];
+
+  int n = x.length();
+  NumericVector x_out(n * 2);
+  NumericVector y_out(n * 2);
+
+  for(int i = 0; i < n; i++) {
+
+    x_out[i]   = x[i] + thickness * cos(a[i] + M_PI * 0.5);
+    y_out[i]   = y[i] + thickness * sin(a[i] + M_PI * 0.5);
+
+    x_out[i + n] = x[n - i - 1] + thickness * cos(a[n - i - 1] - M_PI * 0.5);
+    y_out[i + n] = y[n - i - 1] + thickness * sin(a[n - i - 1] - M_PI * 0.5);
+
+  }
+
+  return(DataFrame::create(_["x"] = x_out,
+                           _["y"] = y_out));
+
+}
+
+
+// [[Rcpp::export]]
 NumericVector grow(int len) {
 
   std::vector<double> out;

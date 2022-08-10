@@ -101,6 +101,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// path_to_polygon
+DataFrame path_to_polygon(DataFrame path, double thickness);
+RcppExport SEXP _flow_path_to_polygon(SEXP pathSEXP, SEXP thicknessSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< double >::type thickness(thicknessSEXP);
+    rcpp_result_gen = Rcpp::wrap(path_to_polygon(path, thickness));
+    return rcpp_result_gen;
+END_RCPP
+}
 // grow
 NumericVector grow(int len);
 RcppExport SEXP _flow_grow(SEXP lenSEXP) {
@@ -180,6 +192,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flow_get_angle2", (DL_FUNC) &_flow_get_angle2, 3},
     {"_flow_check_neighbors", (DL_FUNC) &_flow_check_neighbors, 4},
     {"_flow_update_current_seeds", (DL_FUNC) &_flow_update_current_seeds, 3},
+    {"_flow_path_to_polygon", (DL_FUNC) &_flow_path_to_polygon, 2},
     {"_flow_grow", (DL_FUNC) &_flow_grow, 1},
     {"_flow_grow2", (DL_FUNC) &_flow_grow2, 1},
     {"_flow_grow3", (DL_FUNC) &_flow_grow3, 1},

@@ -25,6 +25,10 @@ update_current_seeds <- function(line, flowfield_df, dsep) {
     .Call(`_flow_update_current_seeds`, line, flowfield_df, dsep)
 }
 
+path_to_polygon <- function(path, thickness = 1) {
+    .Call(`_flow_path_to_polygon`, path, thickness)
+}
+
 grow <- function(len) {
     .Call(`_flow_grow`, len)
 }
