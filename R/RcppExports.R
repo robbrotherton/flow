@@ -49,6 +49,10 @@ rever <- function(seq) {
     .Call(`_flow_rever`, seq)
 }
 
+check_valid <- function(x, y, w, h, existing_points, dtest) {
+    .Call(`_flow_check_valid`, x, y, w, h, existing_points, dtest)
+}
+
 pack_circles_cpp <- function(width, height, max_circles, r, max_attempts = 2000L, seed = 1L) {
     .Call(`_flow_pack_circles_cpp`, width, height, max_circles, r, max_attempts, seed)
 }

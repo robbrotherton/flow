@@ -168,6 +168,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// check_valid
+bool check_valid(double x, double y, int w, int h, DataFrame existing_points, double dtest);
+RcppExport SEXP _flow_check_valid(SEXP xSEXP, SEXP ySEXP, SEXP wSEXP, SEXP hSEXP, SEXP existing_pointsSEXP, SEXP dtestSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type y(ySEXP);
+    Rcpp::traits::input_parameter< int >::type w(wSEXP);
+    Rcpp::traits::input_parameter< int >::type h(hSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type existing_points(existing_pointsSEXP);
+    Rcpp::traits::input_parameter< double >::type dtest(dtestSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_valid(x, y, w, h, existing_points, dtest));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pack_circles_cpp
 DataFrame pack_circles_cpp(int width, int height, int max_circles, double r, int max_attempts, int seed);
 RcppExport SEXP _flow_pack_circles_cpp(SEXP widthSEXP, SEXP heightSEXP, SEXP max_circlesSEXP, SEXP rSEXP, SEXP max_attemptsSEXP, SEXP seedSEXP) {
@@ -198,6 +214,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flow_grow3", (DL_FUNC) &_flow_grow3, 1},
     {"_flow_grow_rev", (DL_FUNC) &_flow_grow_rev, 1},
     {"_flow_rever", (DL_FUNC) &_flow_rever, 1},
+    {"_flow_check_valid", (DL_FUNC) &_flow_check_valid, 6},
     {"_flow_pack_circles_cpp", (DL_FUNC) &_flow_pack_circles_cpp, 6},
     {NULL, NULL, 0}
 };

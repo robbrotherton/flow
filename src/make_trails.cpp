@@ -541,7 +541,7 @@ NumericVector rever(NumericVector seq) {
 }
 
 
-
+// [[Rcpp::export]]
 bool check_valid(double x, double y, int w, int h, DataFrame existing_points, double dtest) {
 
   // Check if point is out of bounds
