@@ -29,26 +29,6 @@ path_to_polygon <- function(path, thickness = 1) {
     .Call(`_flow_path_to_polygon`, path, thickness)
 }
 
-grow <- function(len) {
-    .Call(`_flow_grow`, len)
-}
-
-grow2 <- function(len) {
-    .Call(`_flow_grow2`, len)
-}
-
-grow3 <- function(len) {
-    .Call(`_flow_grow3`, len)
-}
-
-grow_rev <- function(steps) {
-    .Call(`_flow_grow_rev`, steps)
-}
-
-rever <- function(seq) {
-    .Call(`_flow_rever`, seq)
-}
-
 check_valid <- function(x, y, w, h, existing_points, dtest) {
     .Call(`_flow_check_valid`, x, y, w, h, existing_points, dtest)
 }

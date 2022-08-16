@@ -21,28 +21,15 @@ DataFrame make_long_trail(double x0,
   NumericVector ff_y = flowfield["y"];
   NumericVector ff_a = flowfield["angle"];
 
-  // int min_x = min(ff_x);
-  // int max_x = max(ff_x);
-  // int min_y = min(ff_y);
-  // int max_y = max(ff_y);
   int w = max(ff_x);
   int h = max(ff_y);
 
-  // double x_step;
-  // double y_step;
   int step;
 
   double x;
   double y;
   double a;
   double a0 = ff_a[get_angle2(x0, y0, w)];
-
-  // std::vector<double>  x_forward(1000);
-  // std::vector<double>  y_forward(1000);
-  // std::vector<double>  a_forward(1000);
-  // std::vector<double> x_backward(1000);
-  // std::vector<double> y_backward(1000);
-  // std::vector<double> a_backward(1000);
 
   NumericVector x_back(1000);
   NumericVector y_back(1000);
@@ -475,70 +462,6 @@ DataFrame path_to_polygon(DataFrame path, double thickness = 1) {
 
 }
 
-
-// [[Rcpp::export]]
-NumericVector grow(int len) {
-
-  std::vector<double> out;
-
-  for (int i = 0; i < len; i++) {
-    out.resize(i+1);
-    out[i] = i;
-  }
-
-  return Rcpp::wrap(out);
-}
-
-// [[Rcpp::export]]
-NumericVector grow2(int len) {
-
-  std::vector<double> out(10000);
-
-  for (int i = 0; i < len; i++) {
-    out[i] = i;
-  }
-
-  out.resize(len);
-
-  return Rcpp::wrap(out);
-}
-
-// [[Rcpp::export]]
-NumericVector grow3(int len) {
-
-  std::vector<double> out;
-  out.reserve(10000);
-
-  for (int i = 0; i < len; i++) {
-    out.push_back(i);
-  }
-
-  std::reverse(out.begin(), out.end());
-
-  return Rcpp::wrap(out);
-}
-
-// [[Rcpp::export]]
-NumericVector grow_rev(int steps) {
-
-  NumericVector init(10);
-  NumericVector out(10);
-
-  for (int i = 0; i < steps; i++) {
-    init[i] = i + 1;
-  }
-
-  for (int i = 0; i < steps; i++) {
-    out[i] = init[steps - i - 1];
-  }
-
-  return out;
-}
-
-// [[Rcpp::export]]
-NumericVector rever(NumericVector seq) {
-  return rev(seq);
-}
 
 
 // [[Rcpp::export]]

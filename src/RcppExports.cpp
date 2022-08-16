@@ -113,61 +113,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// grow
-NumericVector grow(int len);
-RcppExport SEXP _flow_grow(SEXP lenSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
-    rcpp_result_gen = Rcpp::wrap(grow(len));
-    return rcpp_result_gen;
-END_RCPP
-}
-// grow2
-NumericVector grow2(int len);
-RcppExport SEXP _flow_grow2(SEXP lenSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
-    rcpp_result_gen = Rcpp::wrap(grow2(len));
-    return rcpp_result_gen;
-END_RCPP
-}
-// grow3
-NumericVector grow3(int len);
-RcppExport SEXP _flow_grow3(SEXP lenSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
-    rcpp_result_gen = Rcpp::wrap(grow3(len));
-    return rcpp_result_gen;
-END_RCPP
-}
-// grow_rev
-NumericVector grow_rev(int steps);
-RcppExport SEXP _flow_grow_rev(SEXP stepsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type steps(stepsSEXP);
-    rcpp_result_gen = Rcpp::wrap(grow_rev(steps));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rever
-NumericVector rever(NumericVector seq);
-RcppExport SEXP _flow_rever(SEXP seqSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type seq(seqSEXP);
-    rcpp_result_gen = Rcpp::wrap(rever(seq));
-    return rcpp_result_gen;
-END_RCPP
-}
 // check_valid
 bool check_valid(double x, double y, int w, int h, DataFrame existing_points, double dtest);
 RcppExport SEXP _flow_check_valid(SEXP xSEXP, SEXP ySEXP, SEXP wSEXP, SEXP hSEXP, SEXP existing_pointsSEXP, SEXP dtestSEXP) {
@@ -209,11 +154,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flow_check_neighbors", (DL_FUNC) &_flow_check_neighbors, 4},
     {"_flow_update_current_seeds", (DL_FUNC) &_flow_update_current_seeds, 3},
     {"_flow_path_to_polygon", (DL_FUNC) &_flow_path_to_polygon, 2},
-    {"_flow_grow", (DL_FUNC) &_flow_grow, 1},
-    {"_flow_grow2", (DL_FUNC) &_flow_grow2, 1},
-    {"_flow_grow3", (DL_FUNC) &_flow_grow3, 1},
-    {"_flow_grow_rev", (DL_FUNC) &_flow_grow_rev, 1},
-    {"_flow_rever", (DL_FUNC) &_flow_rever, 1},
     {"_flow_check_valid", (DL_FUNC) &_flow_check_valid, 6},
     {"_flow_pack_circles_cpp", (DL_FUNC) &_flow_pack_circles_cpp, 6},
     {NULL, NULL, 0}
