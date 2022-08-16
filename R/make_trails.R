@@ -1,18 +1,29 @@
 #' Generate flowfield trails
 #'
-#' @param flowfield
-#' @param particles
-#' @param max_steps
-#' @param step_length
-#' @param direction
-#' @param dtest
+#' @param flowfield A data frame containing three columns, x, y, and a: the
+#'   coordinates of the flowfield grid and the angle associated with each grid
+#'   reference.
+#' @param particles A data frame containing two columns, x and y: the
+#'   coordinates of the starting points (particles) from which trails will be
+#'   generated on the flowfield.
+#' @param max_steps The maximum number of steps to take from each trail seed
+#'   point. Trails will be terminated prior to taking this many steps if the go
+#'   out of bounds of the flowfield, or, if \code{dtest} is specified, when a
+#'   trail becomes too close to an existing point.
+#' @param step_length The length of each 'step' taken as a trail is generated.
+#'   Smaller values result in smoother lines.
+#' @param direction Which direction should a trail be drawn from a seedpoint?
+#'   One of 'forward', 'backward' or 'both'.
+#' @param dtest The test distance for terminating a trail when it becomes too
+#'   close to an existing point. Larger values result in sparser trails. A value
+#'   of zero means lines will not be terminated.
 #'
 #' @return
 #' @export
 #'
-#' @examples
+#' @examples make_flowfield() |> make_trails() |> draw_trails()
 make_trails <- function(flowfield,
-                        particles = particles_poisson(10, lims(flowfield)),
+                        particles = particles_poisson(100, lims(flowfield)),
                         max_steps = 1,
                         step_length = .01,
                         direction = c("both", "forward", "backward"),
