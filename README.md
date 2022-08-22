@@ -38,4 +38,4 @@ make_trails(ff, p,
   draw_trails(alpha = .3, size = .2)
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-example-1.png" width="6" height="6" />

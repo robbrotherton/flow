@@ -32,7 +32,7 @@ devtools::install_github("robbrotherton/flow")
 
 ## Example
 
-```{r example}
+```{r example, out.width=6, out.height=6, dpi=300}
 library(flow)
 
 ff <- make_flowfield(angle = 2, octaves = 4)
