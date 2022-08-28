@@ -33,6 +33,18 @@ check_valid <- function(x, y, w, h, existing_points, dtest) {
     .Call(`_flow_check_valid`, x, y, w, h, existing_points, dtest)
 }
 
+make_trail_oop <- function(x0, y0, direction, step_length, max_steps, flowfield, existing_points, dtest) {
+    .Call(`_flow_make_trail_oop`, x0, y0, direction, step_length, max_steps, flowfield, existing_points, dtest)
+}
+
+test_class_Flowfield <- function(df, x, y) {
+    invisible(.Call(`_flow_test_class_Flowfield`, df, x, y))
+}
+
+test_class_pointOnFlowfield <- function(x, y, ff_df, step_length) {
+    invisible(.Call(`_flow_test_class_pointOnFlowfield`, x, y, ff_df, step_length))
+}
+
 pack_circles_cpp <- function(width, height, max_circles, r, max_attempts = 2000L, seed = 1L) {
     .Call(`_flow_pack_circles_cpp`, width, height, max_circles, r, max_attempts, seed)
 }

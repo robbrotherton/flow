@@ -129,6 +129,49 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// make_trail_oop
+DataFrame make_trail_oop(double x0, double y0, int direction, double step_length, int max_steps, DataFrame flowfield, DataFrame existing_points, double dtest);
+RcppExport SEXP _flow_make_trail_oop(SEXP x0SEXP, SEXP y0SEXP, SEXP directionSEXP, SEXP step_lengthSEXP, SEXP max_stepsSEXP, SEXP flowfieldSEXP, SEXP existing_pointsSEXP, SEXP dtestSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type x0(x0SEXP);
+    Rcpp::traits::input_parameter< double >::type y0(y0SEXP);
+    Rcpp::traits::input_parameter< int >::type direction(directionSEXP);
+    Rcpp::traits::input_parameter< double >::type step_length(step_lengthSEXP);
+    Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type flowfield(flowfieldSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type existing_points(existing_pointsSEXP);
+    Rcpp::traits::input_parameter< double >::type dtest(dtestSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_trail_oop(x0, y0, direction, step_length, max_steps, flowfield, existing_points, dtest));
+    return rcpp_result_gen;
+END_RCPP
+}
+// test_class_Flowfield
+void test_class_Flowfield(DataFrame df, int x, int y);
+RcppExport SEXP _flow_test_class_Flowfield(SEXP dfSEXP, SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< int >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type y(ySEXP);
+    test_class_Flowfield(df, x, y);
+    return R_NilValue;
+END_RCPP
+}
+// test_class_pointOnFlowfield
+void test_class_pointOnFlowfield(double x, double y, DataFrame ff_df, int step_length);
+RcppExport SEXP _flow_test_class_pointOnFlowfield(SEXP xSEXP, SEXP ySEXP, SEXP ff_dfSEXP, SEXP step_lengthSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type y(ySEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type ff_df(ff_dfSEXP);
+    Rcpp::traits::input_parameter< int >::type step_length(step_lengthSEXP);
+    test_class_pointOnFlowfield(x, y, ff_df, step_length);
+    return R_NilValue;
+END_RCPP
+}
 // pack_circles_cpp
 DataFrame pack_circles_cpp(int width, int height, int max_circles, double r, int max_attempts, int seed);
 RcppExport SEXP _flow_pack_circles_cpp(SEXP widthSEXP, SEXP heightSEXP, SEXP max_circlesSEXP, SEXP rSEXP, SEXP max_attemptsSEXP, SEXP seedSEXP) {
@@ -155,6 +198,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flow_update_current_seeds", (DL_FUNC) &_flow_update_current_seeds, 3},
     {"_flow_path_to_polygon", (DL_FUNC) &_flow_path_to_polygon, 2},
     {"_flow_check_valid", (DL_FUNC) &_flow_check_valid, 6},
+    {"_flow_make_trail_oop", (DL_FUNC) &_flow_make_trail_oop, 8},
+    {"_flow_test_class_Flowfield", (DL_FUNC) &_flow_test_class_Flowfield, 3},
+    {"_flow_test_class_pointOnFlowfield", (DL_FUNC) &_flow_test_class_pointOnFlowfield, 4},
     {"_flow_pack_circles_cpp", (DL_FUNC) &_flow_pack_circles_cpp, 6},
     {NULL, NULL, 0}
 };
