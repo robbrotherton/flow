@@ -37,9 +37,6 @@ One of 'forward', 'backward' or 'both'.}
 close to an existing point. Larger values result in sparser trails. A value
 of zero means lines will not be terminated.}
 }
-\value{
-
-}
 \description{
 Generate flowfield trails
 }

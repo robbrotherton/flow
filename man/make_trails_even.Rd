@@ -2,7 +2,7 @@
 % Please edit documentation in R/evenly_spaced_trails.R
 \name{make_trails_even}
 \alias{make_trails_even}
-\title{Title}
+\title{Make evenly-spaced trails on a flowfield}
 \usage{
 make_trails_even(flowfield_df, max_steps = 100, dsep = 0.05, dtest = 0.5)
 }
@@ -22,8 +22,12 @@ of the width of the flowfield.}
 proportion of \code{dsep}.}
 }
 \value{
-
+A data frame with a 'group' column identifying each individual trail,
+x and y coordinates, and the grid angle associated with each coordinate
 }
 \description{
-Title
+Make evenly-spaced trails on a flowfield
+}
+\examples{
+make_flowfield() |> make_trails_even() |> draw_trails()
 }
