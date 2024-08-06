@@ -71,7 +71,7 @@ particles_unif <- function(n, limits) {
 }
 
 lims <- function(df) {
-  if (class(df) == "list") {
+  if ("list" %in% class(df)) {
     df <- df[[1]]
   }
   c(max(df$x), max(df$y))
