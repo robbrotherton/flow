@@ -46,8 +46,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // make_trails_rcpp
-DataFrame make_trails_rcpp(DataFrame particles, DataFrame field_df, double step_length, int max_steps, std::string direction, double dtest);
-RcppExport SEXP _flow_make_trails_rcpp(SEXP particlesSEXP, SEXP field_dfSEXP, SEXP step_lengthSEXP, SEXP max_stepsSEXP, SEXP directionSEXP, SEXP dtestSEXP) {
+DataFrame make_trails_rcpp(DataFrame particles, DataFrame field_df, double step_length, int max_steps, std::string direction, double dtest, Nullable<DataFrame> existing_trails);
+RcppExport SEXP _flow_make_trails_rcpp(SEXP particlesSEXP, SEXP field_dfSEXP, SEXP step_lengthSEXP, SEXP max_stepsSEXP, SEXP directionSEXP, SEXP dtestSEXP, SEXP existing_trailsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -57,7 +57,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
     Rcpp::traits::input_parameter< std::string >::type direction(directionSEXP);
     Rcpp::traits::input_parameter< double >::type dtest(dtestSEXP);
-    rcpp_result_gen = Rcpp::wrap(make_trails_rcpp(particles, field_df, step_length, max_steps, direction, dtest));
+    Rcpp::traits::input_parameter< Nullable<DataFrame> >::type existing_trails(existing_trailsSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_trails_rcpp(particles, field_df, step_length, max_steps, direction, dtest, existing_trails));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -192,7 +193,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_flow_make_long_trail", (DL_FUNC) &_flow_make_long_trail, 7},
     {"_flow_make_trail", (DL_FUNC) &_flow_make_trail, 8},
-    {"_flow_make_trails_rcpp", (DL_FUNC) &_flow_make_trails_rcpp, 6},
+    {"_flow_make_trails_rcpp", (DL_FUNC) &_flow_make_trails_rcpp, 7},
     {"_flow_get_angle2", (DL_FUNC) &_flow_get_angle2, 3},
     {"_flow_check_neighbors", (DL_FUNC) &_flow_check_neighbors, 4},
     {"_flow_update_current_seeds", (DL_FUNC) &_flow_update_current_seeds, 3},

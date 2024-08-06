@@ -9,8 +9,8 @@ make_trail <- function(x0, y0, field_df, existing_points, step_length = 1, max_s
     .Call(`_flow_make_trail`, x0, y0, field_df, existing_points, step_length, max_steps, direction, dtest)
 }
 
-make_trails_rcpp <- function(particles, field_df, step_length = 1, max_steps = 1000L, direction = "both", dtest = 1) {
-    .Call(`_flow_make_trails_rcpp`, particles, field_df, step_length, max_steps, direction, dtest)
+make_trails_rcpp <- function(particles, field_df, step_length = 1, max_steps = 1000L, direction = "both", dtest = 1, existing_trails = NULL) {
+    .Call(`_flow_make_trails_rcpp`, particles, field_df, step_length, max_steps, direction, dtest, existing_trails)
 }
 
 get_angle2 <- function(x, y, w) {

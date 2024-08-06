@@ -27,7 +27,8 @@ make_trails <- function(flowfield,
                         max_steps = 1,
                         step_length = .01,
                         direction = c("both", "forward", "backward"),
-                        dtest = 0) {
+                        dtest = 0,
+                        existing_trails_df = NULL) {
 
 
   direction <- match.arg(direction)
@@ -43,7 +44,8 @@ make_trails <- function(flowfield,
                    max_steps = max_steps,
                    step_length = step_length,
                    direction = direction,
-                   dtest = dtest)
+                   dtest = dtest,
+                   existing_trails = existing_trails_df)
 
 }
 
