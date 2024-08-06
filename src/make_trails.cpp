@@ -293,7 +293,7 @@ DataFrame make_trail(double x0,
 
 // [[Rcpp::export]]
 DataFrame make_trails_rcpp(DataFrame particles,
-                           DataFrame field_df,
+                           List flowfields,
                            double step_length = 1,
                            int max_steps = 1000,
                            std::string direction = "both",
@@ -303,6 +303,9 @@ DataFrame make_trails_rcpp(DataFrame particles,
   NumericVector particles_x = particles["x"];
   NumericVector particles_y = particles["y"];
   int n_particles = particles_x.size();
+  int n_fields = flowfields.size();
+
+  Rcout << n_fields;
 
   NumericVector all_points_x(n_particles * max_steps);
   NumericVector all_points_y(n_particles * max_steps);
@@ -313,7 +316,7 @@ DataFrame make_trails_rcpp(DataFrame particles,
   // use existing_trails if provided, otherwise initialize empty dataframe
   NumericVector existing_x, existing_y;
   bool has_existing_trails = !existing_trails.isNull();
-  Rcout << "existing?" << has_existing_trails;
+
   if (has_existing_trails) {
     DataFrame existing_df = as<DataFrame>(existing_trails);
     existing_x = existing_df["x"];
@@ -324,6 +327,8 @@ DataFrame make_trails_rcpp(DataFrame particles,
 
   for(int i = 0; i < n_particles; ++i) {
 
+    // determine which flow field to use by cycling through the list
+    DataFrame current_field = as<DataFrame>(flowfields[i % n_fields]);
     // Rcout << i;
 
     DataFrame new_line;
@@ -345,7 +350,7 @@ DataFrame make_trails_rcpp(DataFrame particles,
       std::copy(all_points_y.begin(), all_points_y.begin() + n_rows, combined_y.begin() + existing_y.size());
 
       new_line = make_trail(x, y,
-                            field_df,
+                            current_field,
                             DataFrame::create(_["x"] = combined_x,
                                               _["y"] = combined_y),
                                               step_length, max_steps, direction, dtest);
@@ -354,14 +359,14 @@ DataFrame make_trails_rcpp(DataFrame particles,
       if(i == 0) {
 
         new_line = make_trail(x, y,
-                              field_df,
+                              current_field,
                               DataFrame::create(_["x"]= 0, _["y"]= 0), // formerly init_df
                               step_length, max_steps, direction, dtest);
 
       } else {
 
         new_line = make_trail(x, y,
-                              field_df,
+                              current_field,
                               DataFrame::create(_["x"]= all_points_x[Rcpp::Range(0, n_rows - 1)],
                                                 _["y"]= all_points_y[Rcpp::Range(0, n_rows - 1)]),
                                                 step_length, max_steps, direction, dtest);

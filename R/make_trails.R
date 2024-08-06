@@ -1,6 +1,6 @@
 #' Generate flowfield trails
 #'
-#' @param flowfield A data frame containing three columns, x, y, and a: the
+#' @param flowfield A data frame, or a list of data frames, containing three columns, x, y, and a: the
 #'   coordinates of the flowfield grid and the angle associated with each grid
 #'   reference.
 #' @param particles A data frame containing two columns, x and y: the
@@ -24,22 +24,26 @@
 #' @examples make_flowfield() |> make_trails() |> draw_trails()
 make_trails <- function(flowfield,
                         particles = particles_poisson(100, lims(flowfield)),
-                        max_steps = 1,
-                        step_length = .01,
+                        max_steps = 20,
+                        step_length = 1,
                         direction = c("both", "forward", "backward"),
                         dtest = 0,
                         existing_trails_df = NULL) {
 
 
+  if ("data.frame" %in% class(flowfield)) {
+    flowfield <- list(flowfield)
+  }
+
   direction <- match.arg(direction)
 
-  ff_width <- max(flowfield$x) # - min(flowfield_df$x)
-  ff_height <- max(flowfield$y) # - min(flowfield_df$y)
-  max_steps <- as.integer(ff_width * max_steps)
-  step_length <- ff_width * step_length
+  # ff_width <- max(flowfield$x) # - min(flowfield_df$x)
+  # ff_height <- max(flowfield$y) # - min(flowfield_df$y)
+  # max_steps <- as.integer(ff_width * max_steps)
+  # step_length <- ff_width * step_length
 
 
-  make_trails_rcpp(field_df = flowfield,
+  make_trails_rcpp(flowfields = flowfield,
                    particles = particles,
                    max_steps = max_steps,
                    step_length = step_length,
@@ -67,6 +71,9 @@ particles_unif <- function(n, limits) {
 }
 
 lims <- function(df) {
+  if (class(df) == "list") {
+    df <- df[[1]]
+  }
   c(max(df$x), max(df$y))
 }
 
