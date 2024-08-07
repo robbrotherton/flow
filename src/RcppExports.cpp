@@ -10,23 +10,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// make_long_trail
-DataFrame make_long_trail(double x0, double y0, DataFrame flowfield, DataFrame existing_points, double step_length, double dtest, int max_steps);
-RcppExport SEXP _flow_make_long_trail(SEXP x0SEXP, SEXP y0SEXP, SEXP flowfieldSEXP, SEXP existing_pointsSEXP, SEXP step_lengthSEXP, SEXP dtestSEXP, SEXP max_stepsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type x0(x0SEXP);
-    Rcpp::traits::input_parameter< double >::type y0(y0SEXP);
-    Rcpp::traits::input_parameter< DataFrame >::type flowfield(flowfieldSEXP);
-    Rcpp::traits::input_parameter< DataFrame >::type existing_points(existing_pointsSEXP);
-    Rcpp::traits::input_parameter< double >::type step_length(step_lengthSEXP);
-    Rcpp::traits::input_parameter< double >::type dtest(dtestSEXP);
-    Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
-    rcpp_result_gen = Rcpp::wrap(make_long_trail(x0, y0, flowfield, existing_points, step_length, dtest, max_steps));
-    return rcpp_result_gen;
-END_RCPP
-}
 // make_trail
 DataFrame make_trail(double x0, double y0, DataFrame field_df, DataFrame existing_points, double step_length, int max_steps, std::string direction, double dtest);
 RcppExport SEXP _flow_make_trail(SEXP x0SEXP, SEXP y0SEXP, SEXP field_dfSEXP, SEXP existing_pointsSEXP, SEXP step_lengthSEXP, SEXP max_stepsSEXP, SEXP directionSEXP, SEXP dtestSEXP) {
@@ -191,7 +174,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_flow_make_long_trail", (DL_FUNC) &_flow_make_long_trail, 7},
     {"_flow_make_trail", (DL_FUNC) &_flow_make_trail, 8},
     {"_flow_make_trails_rcpp", (DL_FUNC) &_flow_make_trails_rcpp, 7},
     {"_flow_get_angle2", (DL_FUNC) &_flow_get_angle2, 3},
