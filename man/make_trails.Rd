@@ -7,16 +7,18 @@
 make_trails(
   flowfield,
   particles = particles_poisson(100, lims(flowfield)),
-  max_steps = 1,
-  step_length = 0.01,
+  max_steps = 100,
+  step_length = 1,
   direction = c("both", "forward", "backward"),
-  dtest = 0
+  dtest = 0,
+  existing_trails_df = NULL
 )
 }
 \arguments{
-\item{flowfield}{A data frame containing three columns, x, y, and a: the
-coordinates of the flowfield grid and the angle associated with each grid
-reference.}
+\item{flowfield}{A data frame, or a list of data frames. Each flowfield data
+frame must contain three columns, x, y, and a: the coordinates of the
+flowfield grid and the angle associated with each grid reference. If a list
+of data frames is supplied, trails will be drawn in alternating order.}
 
 \item{particles}{A data frame containing two columns, x and y: the
 coordinates of the starting points (particles) from which trails will be
@@ -36,6 +38,12 @@ One of 'forward', 'backward' or 'both'.}
 \item{dtest}{The test distance for terminating a trail when it becomes too
 close to an existing point. Larger values result in sparser trails. A value
 of zero means lines will not be terminated.}
+
+\item{existing_trails_df}{A data frame containing previously-drawn trails.
+New trails will avoid collisions with these according to dtest.}
+}
+\value{
+A data frame.
 }
 \description{
 Generate flowfield trails
