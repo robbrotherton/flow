@@ -26,7 +26,7 @@
 #'
 #' @examples make_flowfield() |> make_trails() |> draw_trails()
 make_trails <- function(flowfield,
-                        particles = particles_poisson(100, lims(flowfield)),
+                        particles = trail_seeds(100, ff_limits(flowfield)),
                         max_steps = 100,
                         step_length = 1,
                         direction = c("both", "forward", "backward"),
@@ -56,6 +56,22 @@ make_trails <- function(flowfield,
 
 }
 
+trail_seeds <- function(n,
+                        limits,
+                        distribution = c("poisson", "grid", "uniform"),
+                        size = 0,
+                        max_length = 100) {
+
+  distribution <- match.arg(distribution, choices = c("poisson", "grid", "uniform"))
+  distribution <- switch(distribution,
+                         "poisson"  = particles_poisson(n, limits),
+                         "grid" = particles_grid(n, limits),
+                         "uniform"   = particles_unif(n, limits))
+
+  distribution |>
+    dplyr::mutate(size = rep(size, length.out = dplyr::n()),
+                  max_length = rep(max_length, length.out = dplyr::n()))
+}
 
 particles_poisson <- function(n, limits) {
   pack_circles_cpp(limits[1], limits[2],
@@ -73,7 +89,7 @@ particles_unif <- function(n, limits) {
              y = runif(n, min = 1, max = limits[2]))
 }
 
-lims <- function(df) {
+ff_limits <- function(df) {
   if (is.list(df)) {
     df <- df[[1]]
   }
