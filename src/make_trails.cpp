@@ -21,32 +21,34 @@ double get_angle2(double x, double y, int w);
 DataFrame make_trails_rcpp(DataFrame particles,
                            List flowfields,
                            double step_length = 1,
-                           int max_steps = 1000,
                            std::string direction = "both",
                            Nullable<DataFrame> existing_trails = R_NilValue) {
 
   NumericVector particles_x = particles["x"];
   NumericVector particles_y = particles["y"];
   NumericVector particles_size = particles["size"];
+  NumericVector particles_steps = particles["max_length"];
 
   int n_particles = particles_x.size();
   int n_fields = flowfields.size();
+  int max_vector_size = sum(particles_steps);
 
-  NumericVector all_points_x(n_particles * max_steps);
-  NumericVector all_points_y(n_particles * max_steps);
-  NumericVector all_points_size(n_particles * max_steps);
-  NumericVector all_points_g(n_particles * max_steps);
+  NumericVector all_points_x(max_vector_size);
+  NumericVector all_points_y(max_vector_size);
+  NumericVector all_points_size(max_vector_size);
+  NumericVector all_points_g(max_vector_size);
 
   // DataFrame init_df = DataFrame::create(_["x"]= 0, _["y"]= 0);
 
   // use existing_trails if provided, otherwise initialize empty dataframe
-  NumericVector existing_x, existing_y;
+  NumericVector existing_x, existing_y, existing_size;
   bool has_existing_trails = !existing_trails.isNull();
 
   if (has_existing_trails) {
     DataFrame existing_df = as<DataFrame>(existing_trails);
     existing_x = existing_df["x"];
     existing_y = existing_df["y"];
+    existing_size = existing_df["size"];
   }
 
   int n_rows = 0;
@@ -62,25 +64,30 @@ DataFrame make_trails_rcpp(DataFrame particles,
     double x = particles_x[i];
     double y = particles_y[i];
     double size = particles_size[i];
+    int steps = particles_steps[i];
 
     if (has_existing_trails) {
       // combine existing and newly generated points
       NumericVector combined_x(existing_x.size() + n_rows);
       NumericVector combined_y(existing_y.size() + n_rows);
+      NumericVector combined_size(existing_size.size() + n_rows);
 
       // copy existing trails
       std::copy(existing_x.begin(), existing_x.end(), combined_x.begin());
       std::copy(existing_y.begin(), existing_y.end(), combined_y.begin());
+      std::copy(existing_size.begin(), existing_size.end(), combined_size.begin());
 
       // copy newly generated points
       std::copy(all_points_x.begin(), all_points_x.begin() + n_rows, combined_x.begin() + existing_x.size());
       std::copy(all_points_y.begin(), all_points_y.begin() + n_rows, combined_y.begin() + existing_y.size());
+      std::copy(all_points_size.begin(), all_points_size.begin() + n_rows, combined_size.begin() + existing_size.size());
 
       new_line = make_trail(x, y,
                             current_field,
                             DataFrame::create(_["x"] = combined_x,
-                                              _["y"] = combined_y),
-                                              step_length, max_steps, direction, size);
+                                              _["y"] = combined_y,
+                                              _["size"] = combined_size),
+                                              step_length, steps, direction, size);
 
     } else {
       if(i == 0) {
@@ -88,7 +95,7 @@ DataFrame make_trails_rcpp(DataFrame particles,
         new_line = make_trail(x, y,
                               current_field,
                               DataFrame::create(_["x"]= 0, _["y"]= 0, _["size"]= 0), // formerly init_df
-                              step_length, max_steps, direction, size);
+                              step_length, steps, direction, size);
 
       } else {
 
@@ -97,7 +104,7 @@ DataFrame make_trails_rcpp(DataFrame particles,
                               DataFrame::create(_["x"]= all_points_x[Rcpp::Range(0, n_rows - 1)],
                                                 _["y"]= all_points_y[Rcpp::Range(0, n_rows - 1)],
                                                 _["size"]= all_points_size[Rcpp::Range(0, n_rows - 1)]),
-                                                step_length, max_steps, direction, size);
+                                                step_length, steps, direction, size);
 
       }
     }

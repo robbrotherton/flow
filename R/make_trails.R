@@ -27,7 +27,6 @@
 #' @examples make_flowfield() |> make_trails() |> draw_trails()
 make_trails <- function(flowfield,
                         particles = trail_seeds(100, ff_limits(flowfield)),
-                        max_steps = 100,
                         step_length = 1,
                         direction = c("both", "forward", "backward"),
                         existing_trails_df = NULL) {
@@ -47,7 +46,6 @@ make_trails <- function(flowfield,
 
   make_trails_rcpp(flowfields = flowfield,
                    particles = particles,
-                   max_steps = max_steps,
                    step_length = step_length,
                    direction = direction,
                    existing_trails = existing_trails_df)
