@@ -23,7 +23,6 @@ DataFrame make_trails_rcpp(DataFrame particles,
                            double step_length = 1,
                            int max_steps = 1000,
                            std::string direction = "both",
-                           double dtest = 1,
                            Nullable<DataFrame> existing_trails = R_NilValue) {
 
   NumericVector particles_x = particles["x"];
@@ -33,10 +32,9 @@ DataFrame make_trails_rcpp(DataFrame particles,
   int n_particles = particles_x.size();
   int n_fields = flowfields.size();
 
-  Rcout << n_fields;
-
   NumericVector all_points_x(n_particles * max_steps);
   NumericVector all_points_y(n_particles * max_steps);
+  NumericVector all_points_size(n_particles * max_steps);
   NumericVector all_points_g(n_particles * max_steps);
 
   // DataFrame init_df = DataFrame::create(_["x"]= 0, _["y"]= 0);
@@ -63,6 +61,7 @@ DataFrame make_trails_rcpp(DataFrame particles,
 
     double x = particles_x[i];
     double y = particles_y[i];
+    double size = particles_size[i];
 
     if (has_existing_trails) {
       // combine existing and newly generated points
@@ -81,23 +80,24 @@ DataFrame make_trails_rcpp(DataFrame particles,
                             current_field,
                             DataFrame::create(_["x"] = combined_x,
                                               _["y"] = combined_y),
-                                              step_length, max_steps, direction, dtest);
+                                              step_length, max_steps, direction, size);
 
     } else {
       if(i == 0) {
 
         new_line = make_trail(x, y,
                               current_field,
-                              DataFrame::create(_["x"]= 0, _["y"]= 0), // formerly init_df
-                              step_length, max_steps, direction, dtest);
+                              DataFrame::create(_["x"]= 0, _["y"]= 0, _["size"]= 0), // formerly init_df
+                              step_length, max_steps, direction, size);
 
       } else {
 
         new_line = make_trail(x, y,
                               current_field,
                               DataFrame::create(_["x"]= all_points_x[Rcpp::Range(0, n_rows - 1)],
-                                                _["y"]= all_points_y[Rcpp::Range(0, n_rows - 1)]),
-                                                step_length, max_steps, direction, dtest);
+                                                _["y"]= all_points_y[Rcpp::Range(0, n_rows - 1)],
+                                                _["size"]= all_points_size[Rcpp::Range(0, n_rows - 1)]),
+                                                step_length, max_steps, direction, size);
 
       }
     }
@@ -105,11 +105,14 @@ DataFrame make_trails_rcpp(DataFrame particles,
     NumericVector new_x = new_line["x"];
     NumericVector new_y = new_line["y"];
     int n_new_rows = new_x.size();
+
+    if (n_new_rows < 2) continue;
     // NumericVector group(n_new_rows);
 
     for(int j = 0; j < n_new_rows; ++j) {
       all_points_x[n_rows + j] = new_x[j];
       all_points_y[n_rows + j] = new_y[j];
+      all_points_size[n_rows + j] = size;
       all_points_g[n_rows + j] = i;
     }
 
@@ -119,7 +122,8 @@ DataFrame make_trails_rcpp(DataFrame particles,
 
   return(DataFrame::create(_["x"]= all_points_x[Rcpp::Range(0, n_rows - 1)],
                            _["y"]= all_points_y[Rcpp::Range(0, n_rows - 1)],
-                                               _["group"]= all_points_g[Rcpp::Range(0, n_rows - 1)]));
+                           _["size"] = all_points_size[Rcpp::Range(0, n_rows - 1)],
+                           _["group"]= all_points_g[Rcpp::Range(0, n_rows - 1)]));
 
 }
 
@@ -317,10 +321,13 @@ bool check_neighbors(double x, double y, DataFrame existing_points, double dtest
 
   NumericVector existing_x = existing_points["x"];
   NumericVector existing_y = existing_points["y"];
+  NumericVector existing_size = existing_points["size"];
   int n_existing = existing_x.size();
   // Rcout << n_existing;
 
   for(int i = 0; i < n_existing; ++i) {
+
+    double test_distance = dtest + existing_size[i];
 
     // Rcout << i;
     double dx = x - existing_x[i];
@@ -328,7 +335,7 @@ bool check_neighbors(double x, double y, DataFrame existing_points, double dtest
 
     double dist = dx * dx + dy * dy;
     //
-    if(dist < (dtest * dtest)) {
+    if(dist < (test_distance * test_distance)) {
       return(FALSE);
     }
   }
