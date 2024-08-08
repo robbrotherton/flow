@@ -6,11 +6,9 @@
 \usage{
 make_trails(
   flowfield,
-  particles = particles_poisson(100, lims(flowfield)),
-  max_steps = 100,
+  particles = trail_seeds(100, ff_limits(flowfield)),
   step_length = 1,
   direction = c("both", "forward", "backward"),
-  dtest = 0,
   existing_trails_df = NULL
 )
 }
@@ -24,23 +22,23 @@ of data frames is supplied, trails will be drawn in alternating order.}
 coordinates of the starting points (particles) from which trails will be
 generated on the flowfield.}
 
-\item{max_steps}{The maximum number of steps to take from each trail seed
-point. Trails will be terminated prior to taking this many steps if the go
-out of bounds of the flowfield, or, if \code{dtest} is specified, when a
-trail becomes too close to an existing point.}
-
 \item{step_length}{The length of each 'step' taken as a trail is generated.
 Smaller values result in smoother lines.}
 
 \item{direction}{Which direction should a trail be drawn from a seedpoint?
 One of 'forward', 'backward' or 'both'.}
 
+\item{existing_trails_df}{A data frame containing previously-drawn trails.
+New trails will avoid collisions with these according to dtest.}
+
+\item{max_steps}{The maximum number of steps to take from each trail seed
+point. Trails will be terminated prior to taking this many steps if the go
+out of bounds of the flowfield, or, if \code{dtest} is specified, when a
+trail becomes too close to an existing point.}
+
 \item{dtest}{The test distance for terminating a trail when it becomes too
 close to an existing point. Larger values result in sparser trails. A value
 of zero means lines will not be terminated.}
-
-\item{existing_trails_df}{A data frame containing previously-drawn trails.
-New trails will avoid collisions with these according to dtest.}
 }
 \value{
 A data frame.

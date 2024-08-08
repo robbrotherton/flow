@@ -37,6 +37,8 @@ DataFrame make_trails_rcpp(DataFrame particles,
   NumericVector all_points_y(max_vector_size);
   NumericVector all_points_size(max_vector_size);
   NumericVector all_points_g(max_vector_size);
+  NumericVector all_points_x0(max_vector_size);
+  NumericVector all_points_y0(max_vector_size);
 
   // DataFrame init_df = DataFrame::create(_["x"]= 0, _["y"]= 0);
 
@@ -121,6 +123,8 @@ DataFrame make_trails_rcpp(DataFrame particles,
       all_points_y[n_rows + j] = new_y[j];
       all_points_size[n_rows + j] = size;
       all_points_g[n_rows + j] = i;
+      all_points_x0[n_rows + j] = x;
+      all_points_y0[n_rows + j] = y;
     }
 
     n_rows = n_rows + n_new_rows;
@@ -130,7 +134,9 @@ DataFrame make_trails_rcpp(DataFrame particles,
   return(DataFrame::create(_["x"]= all_points_x[Rcpp::Range(0, n_rows - 1)],
                            _["y"]= all_points_y[Rcpp::Range(0, n_rows - 1)],
                            _["size"] = all_points_size[Rcpp::Range(0, n_rows - 1)],
-                           _["group"]= all_points_g[Rcpp::Range(0, n_rows - 1)]));
+                           _["group"]= all_points_g[Rcpp::Range(0, n_rows - 1)],
+                           _["x0"]= all_points_x0[Rcpp::Range(0, n_rows - 1)],
+                           _["y0"]= all_points_y0[Rcpp::Range(0, n_rows - 1)]));
 
 }
 
